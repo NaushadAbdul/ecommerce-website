@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Nexus Store{% endblock %}
+
+{% block content %}
+<div class="auth-container glass-effect">
+    <h2 style="text-align: center; margin-bottom: 2rem; color: var(--primary-color);">Welcome Back</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="alert alert-error" style="margin-bottom: 1rem;">
+                Invalid username or password. Please try again.
+            </div>
+        {% endif %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary);">
+        Don't have an account? <a href="{% url 'register' %}" style="color: var(--primary-color); text-decoration: none;">Sign Up</a>
+    </div>
+</div>
+
+<style>
+    /* Specific styling for Django form fields */
+    .auth-container input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: white;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+    }
+    
+    .auth-container input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ecommerce Store{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar glass-effect">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="logo">Nexus<span>Store</span></a>
+            
+            <!-- Search Bar -->
+            <div class="search-container" style="position: relative; flex: 1; max-width: 400px; margin: 0 2rem;">
+                <form action="{% url 'home' %}" method="get" class="search-form" style="margin: 0; max-width: 100%;">
+                    <input type="text" name="q" id="searchInput" placeholder="Search products..." value="{{ request.GET.q }}" autocomplete="off">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <!-- Live Search Dropdown -->
+                <div id="searchDropdown" class="search-dropdown glass-effect" style="display: none;">
+                    <div id="searchResults"></div>
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Products</a></li>
+                <li><a href="{% url 'cart' %}"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="#">{{ user.username }}</a></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-text">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="btn-login">Login</a></li>
+                    <li><a href="{% url 'register' %}" class="btn-register">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Nexus Store. Premium E-Commerce Experience.</p>
+    </footer>
+
+    <script>
+        // Simple script to auto-hide alerts after 3 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 3000);
+
+        // Live Search Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchDropdown = document.getElementById('searchDropdown');
+            const searchResults = document.getElementById('searchResults');
+            let debounceTimer;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+
+                if (query.length > 0) {
+                    debounceTimer = setTimeout(() => {
+                        fetch(`/api/search/?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                searchResults.innerHTML = '';
+                                if (data.results.length > 0) {
+                                    data.results.forEach(product => {
+                                        const imgHtml = product.image_url 
+                                            ? `<img src="${product.image_url}" alt="${product.name}" class="search-result-img">`
+                                            : `<div class="search-result-placeholder"><i class="fas fa-box"></i></div>`;
+                                        
+                                        const resultItem = `
+                                            <a href="${product.detail_url}" class="search-result-item">
+                                                ${imgHtml}
+                                                <div class="search-result-info">
+                                                    <div class="search-result-name">${product.name}</div>
+                                                    <div class="search-result-price">$${product.price}</div>
+                                                </div>
+                                            </a>
+                                        `;
+                                        searchResults.innerHTML += resultItem;
+                                    });
+                                    searchDropdown.style.display = 'block';
+                                } else {
+                                    searchResults.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary); text-align: center;">No products found.</div>';
+                                    searchDropdown.style.display = 'block';
+                                }
+                            });
+                    }, 300); // 300ms debounce
+                } else {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

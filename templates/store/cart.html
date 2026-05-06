@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Cart - Nexus Store{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Shopping Cart</h1>
+
+<div class="glass-effect" style="padding: 2rem; border-radius: 16px;">
+    {% if cart.items.all %}
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart.items.all %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                            {% else %}
+                                <div style="width: 50px; height: 50px; background: rgba(0,0,0,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-box" style="color: var(--text-secondary);"></i>
+                                </div>
+                            {% endif %}
+                            <strong>{{ item.product.name }}</strong>
+                        </div>
+                    </td>
+                    <td>${{ item.product.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td><strong>${{ item.total_price }}</strong></td>
+                    <td>
+                        <form action="{% url 'remove_from_cart' item.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="cart-summary">
+            <div style="font-size: 1.5rem;">
+                Total: <strong style="color: var(--primary-color);">${{ cart.total_price }}</strong>
+            </div>
+            <a href="{% url 'checkout' %}" class="btn-primary">Proceed to Checkout <i class="fas fa-arrow-right"></i></a>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <i class="fas fa-shopping-cart" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+            <h2>Your cart is empty</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Looks like you haven't added anything yet.</p>
+            <a href="{% url 'home' %}" class="btn-primary">Continue Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

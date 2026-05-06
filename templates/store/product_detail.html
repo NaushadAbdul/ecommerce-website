@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Nexus Store{% endblock %}
+
+{% block content %}
+<div class="product-detail-container glass-effect" style="padding: 3rem; border-radius: 24px;">
+    <div class="product-detail-image" style="background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; min-height: 400px;">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 100%; height: auto; border-radius: 16px;">
+        {% else %}
+            <i class="fas fa-box" style="font-size: 8rem; color: var(--text-secondary);"></i>
+        {% endif %}
+    </div>
+    
+    <div class="product-detail-info">
+        <h1>{{ product.name }}</h1>
+        <div class="price">${{ product.price }}</div>
+        
+        <p>{{ product.description }}</p>
+        
+        <div style="margin-bottom: 2rem; color: var(--text-secondary);">
+            Stock Available: <strong>{{ product.stock }}</strong>
+        </div>
+        
+        <form action="{% url 'add_to_cart' product.pk %}" method="post">
+            {% csrf_token %}
+            {% if product.stock > 0 %}
+                <button type="submit" class="btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem; width: 100%;">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+            {% else %}
+                <button type="button" class="btn-primary btn-disabled" disabled style="font-size: 1.1rem; padding: 1rem 2rem; width: 100%;">
+                    <i class="fas fa-times-circle"></i> Out of Stock
+                </button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

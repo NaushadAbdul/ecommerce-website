@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Nexus Store - Premium Products{% endblock %}
+
+{% block content %}
+
+{% if query %}
+    <h1 class="page-title">Search Results for "{{ query }}"</h1>
+{% else %}
+    <h1 class="page-title">Discover Premium Products</h1>
+    
+    <!-- Trending Carousel -->
+    {% if latest_products %}
+    <h2 style="margin-bottom: 2rem;">Latest Arrivals</h2>
+    <div class="carousel-container glass-effect" style="padding: 2rem;">
+        <div class="carousel-track" id="carouselTrack">
+            {% for product in latest_products %}
+            <div class="carousel-item product-card glass-effect" style="border: none;">
+                <div class="product-image-container" style="height: 150px;">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                    {% else %}
+                        <i class="fas fa-box" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                    {% endif %}
+                </div>
+                <div class="product-info" style="padding: 1rem;">
+                    <h3 class="product-title" style="font-size: 1rem; margin-bottom: 0.25rem;">{{ product.name|truncatechars:30 }}</h3>
+                    <div class="product-price" style="font-size: 1.25rem; margin-bottom: 0.5rem;">${{ product.price }}</div>
+                    <a href="{% url 'product_detail' product.pk %}" class="btn-primary" style="padding: 0.5rem; font-size: 0.875rem;">View</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+        // Simple Carousel Auto-Scroller
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.getElementById('carouselTrack');
+            let position = 0;
+            const itemWidth = document.querySelector('.carousel-item').offsetWidth + 32; // width + gap
+            const totalItems = track.children.length;
+            
+            setInterval(() => {
+                position++;
+                if (position >= totalItems - 2) { // Reset before running out of items
+                    position = 0;
+                }
+                track.style.transform = `translateX(-${position * itemWidth}px)`;
+            }, 3000); // Scroll every 3 seconds
+        });
+    </script>
+    <h2 style="margin-top: 2rem; margin-bottom: 2rem;">All Products</h2>
+    {% endif %}
+{% endif %}
+
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card glass-effect">
+        <div class="product-image-container">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+            {% else %}
+                <i class="fas fa-box" style="font-size: 4rem; color: var(--text-secondary);"></i>
+            {% endif %}
+        </div>
+        <div class="product-info">
+            <h3 class="product-title">{{ product.name }}</h3>
+            <div class="product-price">${{ product.price }}</div>
+            <a href="{% url 'product_detail' product.pk %}" class="btn-primary" style="width: 100%;">View Details</a>
+            {% if product.stock <= 0 %}
+                <span class="out-of-stock-text" style="text-align: center;">Out of Stock</span>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem;">
+        <h2>No products available at the moment.</h2>
+        <p>Please check back later.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
